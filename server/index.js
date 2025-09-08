@@ -73,8 +73,12 @@ app.post('/api/quote', async (req, res) => {
 
 // Serve client build in production
 app.use(express.static(CLIENT_DIST))
-app.get('*', (req, res) => {
-  res.sendFile(path.join(CLIENT_DIST, 'index.html'))
+// SPA fallback for non-API GET requests (Express 5-safe)
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api')) {
+    return res.sendFile(path.join(CLIENT_DIST, 'index.html'))
+  }
+  return next()
 })
 
 app.listen(PORT, () => {
